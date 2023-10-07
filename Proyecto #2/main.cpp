@@ -1,12 +1,11 @@
 #include <iostream>
-#include <SFML/Graphics.hpp>
+#include "MapEngine.h"
 
 using namespace std;
-using namespace sf;
 
 int main(){
 
-    
+    openMap();
 
     return 0;
 }

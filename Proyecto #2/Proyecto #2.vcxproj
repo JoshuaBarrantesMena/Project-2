@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,7 +131,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Proyecto #2.cpp" />
+    <ClCompile Include="MapEngine.cpp" />
+    <ClCompile Include="MapRoute.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="VertexRoute.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MapEngine.h" />
+    <ClInclude Include="MapRoute.h" />
+    <ClInclude Include="VertexRoute.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
