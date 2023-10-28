@@ -4,12 +4,14 @@ VertexRoute::VertexRoute(){
 
 	x = 0;
 	y = 0;
+	color = " ";
 }
 
-VertexRoute::VertexRoute(int pX, int pY) {
+VertexRoute::VertexRoute(int pX, int pY, string pColor) {
 
 	x = pX;
 	y = pY;
+	color = pColor;
 }
 
 VertexRoute::~VertexRoute() {
@@ -34,4 +36,20 @@ int VertexRoute::getX() {
 int VertexRoute::getY() {
 
 	return y;
+}
+
+void VertexRoute::setColor(string pColor) {
+
+	color = pColor;
+}
+
+string VertexRoute::getColor() {
+
+	return color;
+}
+
+void VertexRoute::print() {
+
+	cout << "X: " << x << "     Y: " << y << "     color: " << color << "\n\n";
+
 }

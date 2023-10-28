@@ -21,10 +21,13 @@
     <ClCompile Include="VertexRoute.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="MapRoute.cpp">
+    <ClCompile Include="MapEngine.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="MapEngine.cpp">
+    <ClCompile Include="NodeRoute.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeRouteList.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +35,13 @@
     <ClInclude Include="VertexRoute.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="MapRoute.h">
+    <ClInclude Include="MapEngine.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="MapEngine.h">
+    <ClInclude Include="NodeRoute.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeRouteList.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
