@@ -22,6 +22,8 @@ public:
 
 	void addRoute(NodeRoute&);
 	void replaceRoute(NodeRoute, int);
-	NodeRoute getRoute(int);
+	void clean();
+	NodeRoute& getRoute(int);
 	void printAll();
+	int getListSize(); //conseguir cantidad de rutas
 };

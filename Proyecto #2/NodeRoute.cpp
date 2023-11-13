@@ -8,15 +8,15 @@ NodeRoute::NodeRoute() {
 
 NodeRoute::~NodeRoute() {
 
-	Node* temp;
+	/*Node* temp;
 
 	while (head) {
 		try {
-			temp = head->nextNode;
-			delete head;
-			head = temp;
+			temp = head;
+			head = head->nextNode;
+			delete temp;
 		}catch(int error){}
-	}
+	}*/
 }
 
 void NodeRoute::setHiddenRoute(bool pIsHiddenRoute) {
@@ -25,7 +25,13 @@ void NodeRoute::setHiddenRoute(bool pIsHiddenRoute) {
 
 }
 
-void NodeRoute::addCoords(int pX, int pY, string pColor) {
+bool NodeRoute::getHiddenRoute() {
+
+	return isHiddenRoute;
+
+}
+
+void NodeRoute::addCoords(int pX, int pY, int pColor[]) {
 
 	Node* newNode = new Node(0, pX, pY, pColor);
 	if (!head) {
@@ -42,17 +48,43 @@ void NodeRoute::addCoords(int pX, int pY, string pColor) {
 	}
 }
 
+void NodeRoute::clean() {
+
+	Node* actual;
+
+	while (head) {
+
+		actual = head;
+		head = head->nextNode;
+		delete actual;
+	}
+	head = nullptr;
+}
+
 void NodeRoute::printAll() {
 
 	Node* actual = head;
-
-	while (actual) {
-		cout << "Vector de ruta: " << actual->nodePosition +1 << "\n";
-		cout << "X: " << actual-> x << "\n";
-		cout << "Y: " << actual-> y << "\n";
-		cout << "Color: " << actual-> color << "\n\n";
-		actual = actual->nextNode;
+	if (isHiddenRoute) {
+		//print head
 	}
+	else {
+		while (actual) {
+			cout << "Vector de ruta: " << actual->nodePosition + 1 << "\n";
+			cout << "X: " << actual->x << "\n";
+			cout << "Y: " << actual->y << "\n";
+
+			cout << "R: " << actual->color[0] << "  ";
+			cout << "G: " << actual->color[1] << "  ";
+			cout << "B: " << actual->color[2] << "  ";
+			cout << "\n\n";
+			actual = actual->nextNode;
+		}
+		if (!head) {
+			return;
+			cout << "eliminado\n\n";
+		}
+	}
+	cout << "\n\n";
 }
 
 int NodeRoute::getX(int pNodePos) {
@@ -73,11 +105,23 @@ int NodeRoute::getY(int pNodePos) {
 	return actual->y;
 }
 
-string NodeRoute::getColor(int pNodePos) {
+int NodeRoute::getColor(int pNodePos, int colorPos) {
 
 	Node* actual = head;
 	while (actual->nodePosition != pNodePos) {
 		actual = actual->nextNode;
 	}
-	return actual-> color;
+	return actual-> color[colorPos];
+}
+
+int NodeRoute::getRouteSize() {
+
+	if (!head) {
+		return -1;
+	}
+	Node* actual = head;
+	while (actual->nextNode) {
+		actual = actual->nextNode;
+	}
+	return actual->nodePosition;
 }

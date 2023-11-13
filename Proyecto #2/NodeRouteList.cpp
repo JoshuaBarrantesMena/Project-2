@@ -7,18 +7,35 @@ NodeRouteList::NodeRouteList() {
 
 NodeRouteList::~NodeRouteList() {
 
+	NodeList* temp;
+
 	while (lHead) {
 		try {
-			NodeList* temp = lHead;
+			temp = lHead;
 			lHead = lHead->next;
 			delete temp;
 		}catch(int error){}
 	}
-}
+} 
 
 void NodeRouteList::addRoute(NodeRoute &pRouteNode) {
 
-	NodeList* newNodeRoute = new NodeList(pRouteNode, 0);
+	NodeRoute auxRoute;
+	int x, y;
+	int colors[3];
+
+	for (int iter = 0; iter <= pRouteNode.getRouteSize(); iter++) {
+
+		x = pRouteNode.getX(iter);
+		y = pRouteNode.getY(iter);
+		colors[0] = pRouteNode.getColor(iter, 0);
+		colors[1] = pRouteNode.getColor(iter, 1);
+		colors[2] = pRouteNode.getColor(iter, 2);
+
+		auxRoute.addCoords(x, y, colors);
+	}
+
+	NodeList* newNodeRoute = new NodeList(auxRoute, 0);
 	if (!lHead) {
 		lHead = newNodeRoute;
 	}
@@ -51,7 +68,20 @@ void NodeRouteList::replaceRoute(NodeRoute pRouteNode, int pRoutePos) {
 	delete nextActual;
 }
 
-NodeRoute NodeRouteList::getRoute(int pRoutePos) {
+void NodeRouteList::clean() {
+
+	NodeList* actual;
+
+	while (lHead) {
+
+		actual = lHead;
+		lHead = lHead->next;
+		delete actual;
+	}
+	lHead = nullptr;
+}
+
+NodeRoute& NodeRouteList::getRoute(int pRoutePos) {
 
 	NodeList* actual = lHead;
 	while (actual->nodePosition != pRoutePos) {
@@ -70,5 +100,16 @@ void NodeRouteList::printAll() {
 		actual->routeInfo.printAll();
 		actual = actual->next;
 	}
+}
 
+int NodeRouteList::getListSize() {
+
+	if (!lHead) {
+		return -1;
+	}
+	NodeList* actual = lHead;
+	while (actual->next) {
+		actual = actual->next;
+	}
+	return actual->nodePosition;
 }

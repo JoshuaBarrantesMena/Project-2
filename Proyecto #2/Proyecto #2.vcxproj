@@ -135,13 +135,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NodeRoute.cpp" />
     <ClCompile Include="NodeRouteList.cpp" />
-    <ClCompile Include="VertexRoute.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MapEngine.h" />
     <ClInclude Include="NodeRoute.h" />
     <ClInclude Include="NodeRouteList.h" />
-    <ClInclude Include="VertexRoute.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
