@@ -21,9 +21,11 @@ public:
 	~NodeRouteList();
 
 	void addRoute(NodeRoute&);
+	void setRouteColor(int, int, int[]);
+	void setIsHiddenRoute(int, bool);
 	void replaceRoute(NodeRoute, int);
 	void clean();
 	NodeRoute& getRoute(int);
-	void printAll();
-	int getListSize(); //conseguir cantidad de rutas
+	void printAll(); //temp
+	int getListSize();
 };

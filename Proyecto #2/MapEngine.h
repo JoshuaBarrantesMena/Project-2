@@ -15,6 +15,7 @@ void refreshColorInterface();
 void createRoute();
 void refreshAllRoutes();
 void refreshRoute(NodeRoute&);
+void refreshSelectedRoute();
 void drawLine(int, int, int, int, int[]);
 
 bool mouseDetect(Vector2f, Vector2f);
@@ -24,7 +25,8 @@ bool isPressingButton();
 bool isPressingColorInterface();
 
 void detectButton();
-void detectEditRute();
+void detectCreateRoute();
+void detectEditRoute();
 void detectColorInterface();
 void detectRoutes();
 

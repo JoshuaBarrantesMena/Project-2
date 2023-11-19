@@ -50,6 +50,28 @@ void NodeRouteList::addRoute(NodeRoute &pRouteNode) {
 	}
 }
 
+void NodeRouteList::setRouteColor(int pRoutePos, int pCoordPos, int pNewColor[]) {
+
+	NodeList* actual = lHead;
+	while (actual->nodePosition != pRoutePos) {
+		actual = actual->next;
+	}
+
+	actual->routeInfo.setNewColor(pCoordPos, pNewColor);
+
+}
+
+void NodeRouteList::setIsHiddenRoute(int pRoutePos, bool pIsHiddenRoute){
+
+	NodeList* actual = lHead;
+	while (actual->nodePosition != pRoutePos) {
+		actual = actual->next;
+	}
+
+	actual->routeInfo.setHiddenRoute(pIsHiddenRoute);
+
+}
+
 void NodeRouteList::replaceRoute(NodeRoute pRouteNode, int pRoutePos) {
 
 	NodeList* newRouteNode = new NodeList(pRouteNode, pRoutePos);

@@ -8,15 +8,6 @@ NodeRoute::NodeRoute() {
 
 NodeRoute::~NodeRoute() {
 
-	/*Node* temp;
-
-	while (head) {
-		try {
-			temp = head;
-			head = head->nextNode;
-			delete temp;
-		}catch(int error){}
-	}*/
 }
 
 void NodeRoute::setHiddenRoute(bool pIsHiddenRoute) {
@@ -48,6 +39,18 @@ void NodeRoute::addCoords(int pX, int pY, int pColor[]) {
 	}
 }
 
+void NodeRoute::setNewColor(int pCoordPos, int pNewColor[]) {
+
+	Node* actual = head;
+	while (actual->nodePosition != pCoordPos) {
+		actual = actual->nextNode;
+	}
+	actual->color[0] = pNewColor[0];
+	actual->color[1] = pNewColor[1];
+	actual->color[2] = pNewColor[2];
+
+}
+
 void NodeRoute::clean() {
 
 	Node* actual;
@@ -61,7 +64,7 @@ void NodeRoute::clean() {
 	head = nullptr;
 }
 
-void NodeRoute::printAll() {
+void NodeRoute::printAll() { //temp
 
 	Node* actual = head;
 	if (isHiddenRoute) {

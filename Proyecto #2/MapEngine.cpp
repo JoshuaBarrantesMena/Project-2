@@ -3,7 +3,6 @@
 RenderWindow mapWindow(VideoMode(1600, 900), "Mapa de Costa rica");
 Texture mapBackgroundFile, buttonFile, colorSelecterFile, colorButtonFile;
 Sprite mapBackground, button, colorSelecter, colorButton;
-Image line;
 Font textFont;
 Text buttonText, colorSelecterText;
 Event mapEvent;
@@ -23,14 +22,13 @@ const int colorCodes[3][9] =
 	{0, 96, 0, 0, 64, 128, 64, 255, 128},
 	{0, 0, 96, 128, 0, 64, 128, 64, 255}, 
 	};
-int globalColor[3] = { 255, 255, 255};
-int interfaceNumber, selectedRoute = -1;
+int globalColor[3] = { 96, 0, 0};
+int interfaceNumber, selectedRoute = -1, selectedCoord = -1;
+bool globalHiddenRoute;
 
 void openMap() {
 
-	mapWindow.setFramerateLimit(24);
-
-	line.create(1600, 900, Color(0, 0, 0, 0));
+	mapWindow.setFramerateLimit(60);
 
 	mapBackgroundFile.loadFromFile("Textures/IMAGE.jpg");
 	mapBackground.setTexture(mapBackgroundFile);
@@ -55,18 +53,23 @@ void openMap() {
 	colorSelecterText.setColor(Color(128,192,255,255));
 
 	interfaceNumber = 0;
+	globalHiddenRoute = false;
 
 	while (mapWindow.isOpen()) {
 
 		switch (interfaceNumber) {
 
 		case 1:
-
 			refreshCreateInterface();
 			break;
-		case 2:
 
-			refreshEditInterface();
+		case 2:
+			if (selectedRoute != -1 && selectedCoord != -1) {
+				refreshEditInterface();
+			}
+			else {
+				interfaceNumber = 0;
+			}
 			break;
 
 		case 3:
@@ -86,10 +89,17 @@ void openMap() {
 			refreshInterface();
 			break;
 		}
+		if(interfaceNumber != 2){
+			detectRoutes();
+		}
+
 		refreshAllRoutes();
+		refreshSelectedRoute();
 		mapWindow.display();
 		loopRefresh();
 	}
+	routesList.clean();
+	temporalRoute.clean();
 }
 
 void refreshInterface() {
@@ -101,8 +111,17 @@ void refreshInterface() {
 	mapWindow.draw(mapBackground);
 
 	for (iter = 0; iter < 4; iter++) {
+
 		button.setPosition(buttonXPosition, buttonYPositions[iter]);
-		mapWindow.draw(button);
+		if (iter == 1 && selectedRoute == -1) {
+			Sprite auxButton = button;
+			auxButton.setColor(Color(224, 224, 224, 255));
+			mapWindow.draw(auxButton);
+		}
+		else {
+			mapWindow.draw(button);
+		}
+
 		buttonText.setString(buttonNames[iter]);
 		buttonText.setPosition(textPositions[0][iter], textPositions[1][iter]);
 		mapWindow.draw(buttonText);
@@ -113,7 +132,12 @@ void refreshEditInterface(){
 
 	int iter;
 	int textPositions[2][3] = { { 1328, 1330, 1333 }, {64, 185, 305} };
+	int temporalColor[3];
 	string buttonNames[3] = { "Finalizar Ruta", "Eliminar Ruta", "Ocultar Ruta" };
+
+	globalColor[0] = routesList.getRoute(selectedRoute).getColor(selectedCoord, 0);
+	globalColor[1] = routesList.getRoute(selectedRoute).getColor(selectedCoord, 1);
+	globalColor[2] = routesList.getRoute(selectedRoute).getColor(selectedCoord, 2);
 
 	mapWindow.draw(mapBackground);
 
@@ -126,19 +150,26 @@ void refreshEditInterface(){
 	}
 
 	refreshColorInterface();
-	detectEditRute();
 	detectColorInterface();
+	routesList.setRouteColor(selectedRoute, selectedCoord, globalColor);
+
+	detectEditRoute();
+
 }
 
 void refreshCreateInterface() {
 
 	int iter;
 	int textPositions[2][3] = { { 1328, 1330, 1333 }, {64, 185, 305} };
-	string buttonNames[3] = { "Finalizar Ruta", "Eliminar Ruta", "Ocultar Ruta" };
+	string buttonNames[2] = { "Finalizar Ruta", "Eliminar Ruta"};
+
+	globalColor[0] = 96;
+	globalColor[1] = 0;
+	globalColor[2] = 0;
 
 	mapWindow.draw(mapBackground);
 
-	for (iter = 0; iter < 3; iter++) {
+	for (iter = 0; iter < 2; iter++) {
 		button.setPosition(buttonXPosition, buttonYPositions[iter]);
 		mapWindow.draw(button);
 		buttonText.setString(buttonNames[iter]);
@@ -147,7 +178,7 @@ void refreshCreateInterface() {
 	}
 
 	refreshColorInterface();
-	detectEditRute();
+	detectCreateRoute();
 	detectColorInterface();
 	createRoute();
 }
@@ -204,7 +235,7 @@ void createRoute() {
 			if (Mouse::isButtonPressed(Mouse::Left) != true) {
 				isButtonPressed = true;
 				temporalRoute.addCoords(mousePosition.x, mousePosition.y, globalColor);
-				temporalRoute.setHiddenRoute(false);
+				temporalRoute.setHiddenRoute(globalHiddenRoute);
 				temporalRoute.printAll();
 			}
 			loopRefresh();
@@ -214,7 +245,7 @@ void createRoute() {
 
 
 
-void refreshAllRoutes() { //continuar despues
+void refreshAllRoutes() {
 
 	int listIter;
 	int listSize = routesList.getListSize();
@@ -283,9 +314,62 @@ void refreshRoute(NodeRoute& pRoute) {
 
 }
 
+void refreshSelectedRoute() {
+
+	if (selectedRoute != -1) {
+
+		int routeSize = routesList.getRoute(selectedRoute).getRouteSize(), squareSizeIter, thicknessIter;
+
+		int minX, minY, maxX, maxY, coordBonus = 12;
+
+		minX = routesList.getRoute(selectedRoute).getX(0);
+		minY = routesList.getRoute(selectedRoute).getY(0);
+		maxX = routesList.getRoute(selectedRoute).getX(0);
+		maxY = routesList.getRoute(selectedRoute).getY(0);
+
+		for (squareSizeIter = 0; squareSizeIter <= routeSize; squareSizeIter++) {
+			if (routesList.getRoute(selectedRoute).getX(squareSizeIter) < minX) {
+				minX = routesList.getRoute(selectedRoute).getX(squareSizeIter);
+			}
+			if (routesList.getRoute(selectedRoute).getY(squareSizeIter) < minY) {
+				minY = routesList.getRoute(selectedRoute).getY(squareSizeIter);
+			}
+			if (routesList.getRoute(selectedRoute).getX(squareSizeIter) > maxX) {
+				maxX = routesList.getRoute(selectedRoute).getX(squareSizeIter);
+			}
+			if (routesList.getRoute(selectedRoute).getY(squareSizeIter) > maxY) {
+				maxY = routesList.getRoute(selectedRoute).getY(squareSizeIter);
+			}
+		}
+
+		minX -= coordBonus;
+		minY -= coordBonus;
+		maxX += coordBonus;
+		maxY += coordBonus;
+
+		const int squareThickness = 3;
+		int squareColor[3] = { 255, 0, 127 };
+
+		for (thicknessIter = 0; thicknessIter < squareThickness; thicknessIter++) {
+
+			drawLine(minX, minY, maxX, minY, squareColor);
+			drawLine(maxX, minY, maxX, maxY, squareColor);
+			drawLine(maxX, maxY, minX, maxY, squareColor);
+			drawLine(minX, maxY, minX, minY, squareColor);
+
+			minX--;
+			minY--;
+			maxX++;
+			maxY++;
+		}
+	}
+}
+
 void drawLine(int pX1, int pY1, int pX2, int pY2, int color[]) {
 
 	Color pixel(color[0], color[1], color[2], 255);
+	Image line;
+	line.create(1600, 900, Color(0, 0, 0, 0));
 	int xCoord, yCoord, pixelPrinter, pixelIter;
 	float x, y, xIncreaser, yIncreaser;
 
@@ -442,7 +526,7 @@ void detectButton() {
 	}
 }
 
-void detectEditRute(){
+void detectEditRoute(){ //pendiente
 
 	int optionIter, option = 0;
 	bool isChoosingButton = true;
@@ -459,13 +543,57 @@ void detectEditRute(){
 	default:
 		break;
 	case 1:
-		saveNewRoute(temporalRoute);
+		selectedRoute = -1;
+		selectedCoord = -1;
 		interfaceNumber = 0;
 		break;
 	case 2:
+		deleteRouteFile(selectedRoute);
+		chargeRoutes();
+		selectedRoute = -1;
+		selectedCoord = -1;
 		interfaceNumber = 0;
 		break;
 	case 3:
+		if (routesList.getRoute(selectedRoute).getHiddenRoute()) {
+			routesList.setIsHiddenRoute(selectedRoute, false);
+		}
+		else {
+			routesList.setIsHiddenRoute(selectedRoute, true);
+		}
+		break;
+	}
+}
+
+void detectCreateRoute() {
+
+	int optionIter, option = 0;
+	bool isChoosingButton = true;
+
+	for (optionIter = 0; optionIter < 2; optionIter++) {
+		if (isClickingButton(buttonXPosition, 260, buttonYPositions[optionIter], 100)) {
+			cout << "Edit #" << optionIter + 1 << "\n" << "\n"; //temp
+			option = optionIter + 1;
+			isChoosingButton = false;
+		}
+	}
+
+	switch (option) {
+	default:
+		break;
+	case 1:
+		saveNewRoute(temporalRoute);
+		selectedRoute = -1;
+		selectedCoord = -1;
+		interfaceNumber = 0;
+		globalHiddenRoute = false;
+		break;
+	case 2:
+		temporalRoute.clean();
+		selectedRoute = -1;
+		selectedCoord = -1;
+		interfaceNumber = 0;
+		globalHiddenRoute = false;
 		break;
 	}
 }
@@ -492,7 +620,7 @@ void detectColorInterface(){
 
 void detectRoutes() {
 
-	int x1, y1, x2, y2, listIter, routeIter;
+	int x, y, xSize = 20, ySize = 20, listIter, routeIter;
 	int routesListSize = routesList.getListSize(), routeSize;
 
 	for (listIter = 0; listIter <= routesListSize; listIter++) {
@@ -501,8 +629,17 @@ void detectRoutes() {
 
 		for (routeIter = 0; routeIter <= routeSize; routeIter++) {
 
-		}
+			x = routesList.getRoute(listIter).getX(routeIter) - 10;
+			y = routesList.getRoute(listIter).getY(routeIter) - 10;
 
+			if (isClickingButton(x, xSize, y, ySize)) {
+				selectedRoute = listIter;
+				selectedCoord = routeIter;
+
+				cout << "\n\nRuta seleccionada: " << listIter << "\n"; //temp
+				cout << "coordenada seleccionada: " << routeIter << "\n\n\n"; //temp
+			}
+		}
 	}
 }
 
@@ -512,6 +649,11 @@ void detectRoutes() {
 
 void saveNewRoute(NodeRoute pRoute) {
 	
+	if (pRoute.getRouteSize() < 1) {
+		temporalRoute.clean();
+		return;
+	}
+
 	string url = "Routes/r", type = ".txt", name;
 	int routeIter = 0;
 

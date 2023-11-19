@@ -34,6 +34,7 @@ public:
 	void addCoords(int, int, int[]);
 	void clean();
 	void setHiddenRoute(bool);
+	void setNewColor(int, int[]);
 	bool getHiddenRoute();
 	int getX(int);
 	int getY(int);
