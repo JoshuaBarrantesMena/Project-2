@@ -6,9 +6,7 @@ using namespace std;
 
 class NodeRoute {
 private:
-
 	struct Node {
-
 		int nodePosition;
 		int x;
 		int y;
@@ -16,14 +14,13 @@ private:
 		Node* nextNode;
 
 		Node(int pNodePosition, int pX, int pY, int pColor[]) :
-		nodePosition(pNodePosition), x(pX), y(pY), nextNode(nullptr) 
-		{
+		nodePosition(pNodePosition), x(pX), y(pY), nextNode(nullptr) {
+
 			for (int i = 0; i < 3; i++) {
 				color[i] = pColor[i];
 			}
 		}
 	};
-
 	Node* head;
 	bool isHiddenRoute;
 
@@ -32,13 +29,13 @@ public:
 	~NodeRoute();
 	
 	void addCoords(int, int, int[]);
-	void clean();
 	void setHiddenRoute(bool);
-	void setNewColor(int, int[]);
-	bool getHiddenRoute();
+	void setColor(int, int[]);
+	void clean();
+
 	int getX(int);
 	int getY(int);
 	int getColor(int, int);
-	void printAll(); //temp
 	int getRouteSize();
+	bool getIsHiddenRoute();
 };

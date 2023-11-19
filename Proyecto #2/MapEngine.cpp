@@ -17,14 +17,12 @@ const int buttonXPosition = 1300;
 const int buttonYPositions[4] = { 40, 160, 280, 400 };
 const int colorButtonPos[2][3] = { {110, 210, 310}, {470, 550, 630} };
 const int colorCodes[3][9] = 
-	{ 
-	{96, 0, 0, 64, 128, 0, 255, 128, 64},
-	{0, 96, 0, 0, 64, 128, 64, 255, 128},
-	{0, 0, 96, 128, 0, 64, 128, 64, 255}, 
+	{ {96, 0, 0, 64, 128, 0, 255, 128, 64},
+	  {0, 96, 0, 0, 64, 128, 64, 255, 128},
+	  {0, 0, 96, 128, 0, 64, 128, 64, 255}, 
 	};
 int globalColor[3] = { 96, 0, 0};
 int interfaceNumber, selectedRoute = -1, selectedCoord = -1;
-bool globalHiddenRoute;
 
 void openMap() {
 
@@ -53,12 +51,9 @@ void openMap() {
 	colorSelecterText.setColor(Color(128,192,255,255));
 
 	interfaceNumber = 0;
-	globalHiddenRoute = false;
 
 	while (mapWindow.isOpen()) {
-
 		switch (interfaceNumber) {
-
 		case 1:
 			refreshCreateInterface();
 			break;
@@ -78,23 +73,21 @@ void openMap() {
 			break;
 
 		case 4:
-			chargeRoutes();
-			routesList.printAll();
+			chargeAllRoutes();
 
 			interfaceNumber = 0;
 			break;
 
 		default:
 
-			refreshInterface();
+			refreshPrincipalInterface();
 			break;
 		}
 		if(interfaceNumber != 2){
 			detectRoutes();
 		}
-
 		refreshAllRoutes();
-		refreshSelectedRoute();
+		refreshSquareSelectedRoute();
 		mapWindow.display();
 		loopRefresh();
 	}
@@ -102,7 +95,9 @@ void openMap() {
 	temporalRoute.clean();
 }
 
-void refreshInterface() {
+
+
+void refreshPrincipalInterface() {
 
 	int iter;
 	int textPositions[2][4] = {{ 1332, 1346, 1325, 1335 }, {64, 185, 305, 425}};
@@ -121,13 +116,34 @@ void refreshInterface() {
 		else {
 			mapWindow.draw(button);
 		}
-
 		buttonText.setString(buttonNames[iter]);
 		buttonText.setPosition(textPositions[0][iter], textPositions[1][iter]);
 		mapWindow.draw(buttonText);
 	}
-	detectButton();
+	detectClickInButton();
 }
+
+void refreshCreateInterface() {
+
+	int iter;
+	int textPositions[2][3] = { { 1328, 1330, 1333 }, {64, 185, 305} };
+	string buttonNames[2] = { "Finalizar Ruta", "Eliminar Ruta" };
+
+	mapWindow.draw(mapBackground);
+
+	for (iter = 0; iter < 2; iter++) {
+		button.setPosition(buttonXPosition, buttonYPositions[iter]);
+		mapWindow.draw(button);
+		buttonText.setString(buttonNames[iter]);
+		buttonText.setPosition(textPositions[0][iter], textPositions[1][iter]);
+		mapWindow.draw(buttonText);
+	}
+	refreshColorInterface();
+	detectClickInCreateRoute();
+	detectClickInColorInterface();
+	createRoute();
+}
+
 void refreshEditInterface(){
 
 	int iter;
@@ -150,43 +166,15 @@ void refreshEditInterface(){
 	}
 
 	refreshColorInterface();
-	detectColorInterface();
+	detectClickInColorInterface();
 	routesList.setRouteColor(selectedRoute, selectedCoord, globalColor);
 
-	detectEditRoute();
-
-}
-
-void refreshCreateInterface() {
-
-	int iter;
-	int textPositions[2][3] = { { 1328, 1330, 1333 }, {64, 185, 305} };
-	string buttonNames[2] = { "Finalizar Ruta", "Eliminar Ruta"};
-
-	globalColor[0] = 96;
-	globalColor[1] = 0;
-	globalColor[2] = 0;
-
-	mapWindow.draw(mapBackground);
-
-	for (iter = 0; iter < 2; iter++) {
-		button.setPosition(buttonXPosition, buttonYPositions[iter]);
-		mapWindow.draw(button);
-		buttonText.setString(buttonNames[iter]);
-		buttonText.setPosition(textPositions[0][iter], textPositions[1][iter]);
-		mapWindow.draw(buttonText);
-	}
-
-	refreshColorInterface();
-	detectCreateRoute();
-	detectColorInterface();
-	createRoute();
+	detectClickInEditRoute();
 }
 
 void refreshColorInterface(){
 
 	int auxIterX, auxIterY, colorIter = 0;
-
 
 	mapWindow.draw(colorSelecter);
 	colorSelecterText.setString("Elegir color de la ruta");
@@ -196,9 +184,7 @@ void refreshColorInterface(){
 	for (auxIterY = 0; auxIterY < 3; auxIterY++) {
 		for (auxIterX = 0; auxIterX < 3; auxIterX++) {
 		colorButton.setPosition(colorButtonPos[0][auxIterX], colorButtonPos[1][auxIterY]);
-
-		colorButton.setColor(Color(colorCodes[0][colorIter], colorCodes[1][colorIter],
-					colorCodes[2][colorIter], 255));
+		colorButton.setColor(Color(colorCodes[0][colorIter], colorCodes[1][colorIter], colorCodes[2][colorIter], 255));
 		mapWindow.draw(colorButton);
 		colorIter++;
 		}
@@ -212,75 +198,37 @@ void refreshColorInterface(){
 	mapWindow.draw(colorButton);
 }
 
-
-
-
-
-void createRoute() {
-
-	bool isButtonPressed = false;
-
-	mousePosition = Mouse::getPosition(mapWindow);
-
-	refreshRoute(temporalRoute);
-
-	if ((mousePosition.x < 0 || mousePosition.x > 1600) || (mousePosition.y < 0 || 
-		mousePosition.y > 900)) {
-
-		return;
-	}
-
-	if (Mouse::isButtonPressed(Mouse::Left ) && isPressingInterface() != true) {
-		while (isButtonPressed == false) {
-			if (Mouse::isButtonPressed(Mouse::Left) != true) {
-				isButtonPressed = true;
-				temporalRoute.addCoords(mousePosition.x, mousePosition.y, globalColor);
-				temporalRoute.setHiddenRoute(globalHiddenRoute);
-				temporalRoute.printAll();
-			}
-			loopRefresh();
-		}
-	}
-}
-
-
-
 void refreshAllRoutes() {
 
 	int listIter;
 	int listSize = routesList.getListSize();
 
 	for (listIter = 0; listIter < listSize + 1; listIter++) {
-
 		refreshRoute(routesList.getRoute(listIter));
-		
 	}
 }
 
 void refreshRoute(NodeRoute& pRoute) {
 
-	int routeSize;
+	int routeSize = pRoute.getRouteSize();;
 	int routeIter, colorIter;
 	int x, y, xAux = -1, yAux = -1, routeColor[3];
+
 	CircleShape circle(10);
-	
 
-	routeSize = pRoute.getRouteSize();
-
-	if (pRoute.getHiddenRoute()) {
-
+	if (pRoute.getIsHiddenRoute()) {
 		x = pRoute.getX(0);
 		y = pRoute.getY(0);
+
 		for (colorIter = 0; colorIter < 3; colorIter++) {
 			routeColor[colorIter] = pRoute.getColor(0, colorIter);
 		}
-
 		circle.setPosition(x - 10, y - 10);
 		circle.setFillColor(Color(routeColor[0], routeColor[1], routeColor[2], 255));
 		mapWindow.draw(circle);
 		circle.setRadius(5);
 
-		for (colorIter; colorIter < 3; colorIter++) {
+		for (colorIter = 0; colorIter < 3; colorIter++) {
 			if ((routeColor[colorIter] - 32) >= 0) {
 				routeColor[colorIter] -= 32;
 			}
@@ -293,33 +241,29 @@ void refreshRoute(NodeRoute& pRoute) {
 	}
 	else {
 		for (routeIter = 0; routeIter < routeSize + 1; routeIter++) {
-
 			x = pRoute.getX(routeIter);
 			y = pRoute.getY(routeIter);
+
 			for (colorIter = 0; colorIter < 3; colorIter++) {
 				routeColor[colorIter] = pRoute.getColor(routeIter, colorIter);
 			}
-
 			circle.setPosition(x - 10, y - 10);
 			circle.setFillColor(Color(routeColor[0], routeColor[1], routeColor[2], 255));
 			mapWindow.draw(circle);
 
 			if (xAux >= 0 && yAux >= 0) {
-				drawLine(x, y, xAux, yAux, routeColor);
+				drawLine(Vector2f(x, y), Vector2f(xAux, yAux), routeColor);
 			}
 			xAux = x;
 			yAux = y;
 		}
 	}
-
 }
 
-void refreshSelectedRoute() {
+void refreshSquareSelectedRoute() {
 
 	if (selectedRoute != -1) {
-
 		int routeSize = routesList.getRoute(selectedRoute).getRouteSize(), squareSizeIter, thicknessIter;
-
 		int minX, minY, maxX, maxY, coordBonus = 12;
 
 		minX = routesList.getRoute(selectedRoute).getX(0);
@@ -351,11 +295,10 @@ void refreshSelectedRoute() {
 		int squareColor[3] = { 255, 0, 127 };
 
 		for (thicknessIter = 0; thicknessIter < squareThickness; thicknessIter++) {
-
-			drawLine(minX, minY, maxX, minY, squareColor);
-			drawLine(maxX, minY, maxX, maxY, squareColor);
-			drawLine(maxX, maxY, minX, maxY, squareColor);
-			drawLine(minX, maxY, minX, minY, squareColor);
+			drawLine(Vector2f(minX, minY), Vector2f(maxX, minY), squareColor);
+			drawLine(Vector2f(maxX, minY), Vector2f(maxX, maxY), squareColor);
+			drawLine(Vector2f(maxX, maxY), Vector2f(minX, maxY), squareColor);
+			drawLine(Vector2f(minX, maxY), Vector2f(minX, minY), squareColor);
 
 			minX--;
 			minY--;
@@ -365,17 +308,16 @@ void refreshSelectedRoute() {
 	}
 }
 
-void drawLine(int pX1, int pY1, int pX2, int pY2, int color[]) {
+void drawLine(Vector2f pFirstPoint, Vector2f pSecondPoint, int pColor[]) {
 
-	Color pixel(color[0], color[1], color[2], 255);
+	Color pixel(pColor[0], pColor[1], pColor[2], 255);
 	Image line;
 	line.create(1600, 900, Color(0, 0, 0, 0));
 	int xCoord, yCoord, pixelPrinter, pixelIter;
 	float x, y, xIncreaser, yIncreaser;
 
-	xCoord = pX1 - pX2;
-	yCoord = pY1 - pY2;
-
+	xCoord = pFirstPoint.x - pSecondPoint.x;
+	yCoord = pFirstPoint.y - pSecondPoint.y;
 	pixelPrinter = 0;
 
 	if (abs(xCoord) > abs(yCoord)) {
@@ -387,9 +329,8 @@ void drawLine(int pX1, int pY1, int pX2, int pY2, int color[]) {
 
 	xIncreaser = xCoord / (float)pixelPrinter;
 	yIncreaser = yCoord / (float)pixelPrinter;
-
-	x = pX2;
-	y = pY2;
+	x = pSecondPoint.x;
+	y = pSecondPoint.y;
 
 	for (pixelIter = 0; pixelIter < pixelPrinter; pixelIter++) {
 		line.setPixel(round(x), round(y), pixel);
@@ -405,135 +346,61 @@ void drawLine(int pX1, int pY1, int pX2, int pY2, int color[]) {
 
 
 
-
-
-bool mouseDetect(Vector2f pTopPosition, Vector2f pBottomPosition) {
-
-	mousePosition = Mouse::getPosition(mapWindow);
-
-	if ((mousePosition.x < 0 || mousePosition.x > 1600) || (mousePosition.y < 0 ||
-		mousePosition.y > 900)) {
-
-		return false;
-	}
-
-	bool isInTop = false;
-	bool isInBottom = false;
-
-	if ((mousePosition.x > pTopPosition.x) && (mousePosition.x < pTopPosition.y)) {
-		isInTop = true;
-	}
-	else {
-		isInTop = false;
-	}
-
-	if ((mousePosition.y > pBottomPosition.x) && (mousePosition.y < pBottomPosition.y)) {
-		isInBottom = true;
-	}
-	else {
-		isInBottom = false;
-	}
-
-	if (isInTop && isInBottom) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-bool isClickingButton(int pXPosition, int pXSizePosition, int pYPosition, int pYSizePosition) {
-
-	int minX = pXPosition;
-	int maxX = pXPosition + (pXSizePosition);
-	int minY = pYPosition;
-	int maxY = minY + (pYSizePosition);
-
-	Vector2f top(minX, maxX);
-	Vector2f bottom(minY, maxY);
-
-	bool isButtonPressed = false;
-
-	if (Mouse::isButtonPressed(Mouse::Left) && (mouseDetect(top, bottom))) {
-		while (isButtonPressed == false) {
-			if (Mouse::isButtonPressed(Mouse::Left) != true) {
-				isButtonPressed = true;
-			}
-			loopRefresh();
-		}
-		return true;
-	}
-	return false;
-}
-
-bool isPressingInterface() {
-
-	if (isPressingButton() || isPressingColorInterface()) {
-		return true;
-	}
-	return false;
-}
-
-bool isPressingButton() {
-
-	int minX = buttonXPosition;
-	int maxX = minX + 260;
-
-	bool clickDetected = false;
-
-	for (int buttonIter = 0; buttonIter < 4; buttonIter++) {
-
-		int minY = buttonYPositions[buttonIter];
-		int maxY = minY + 100;
-
-		if (mouseDetect(Vector2f(minX, maxX), Vector2f(minY, maxY))) {
-			return true;
-		}
-		if (clickDetected) {
-			continue;
-		}
-	}
-	return clickDetected;
-}
-
-bool isPressingColorInterface() {
-
-	int minX = 50;
-	int maxX = minX + (360 * 1.1);
-	int minY = 390;
-	int maxY = minY + (300 * 1.5);
-
-	if (mouseDetect(Vector2f(minX, maxX), Vector2f(minY, maxY))) {
-		return true;
-	}
-	return false;
-}
-
-
-
-
-
-void detectButton() {
+void detectClickInButton() {
 
 	int buttonIter;
 
 	for (buttonIter = 0; buttonIter < 4; buttonIter++) {
-		
 		if (isClickingButton(buttonXPosition, 260, buttonYPositions[buttonIter], 100)) {
-			cout << "Interface #" << buttonIter + 1 << "\n" << "\n"; //temp
 			interfaceNumber = buttonIter + 1;
 		}
 	}
 }
 
-void detectEditRoute(){ //pendiente
+void detectClickInCreateRoute() {
+
+	int optionIter, option = 0;
+	bool isChoosingButton = true;
+
+	for (optionIter = 0; optionIter < 2; optionIter++) {
+		if (isClickingButton(buttonXPosition, 260, buttonYPositions[optionIter], 100)) {
+			option = optionIter + 1;
+			isChoosingButton = false;
+		}
+	}
+	switch (option) {
+	default:
+		break;
+	case 1:
+		saveNewRoute(temporalRoute);
+
+		globalColor[0] = 96;
+		globalColor[1] = 0;
+		globalColor[2] = 0;
+		selectedRoute = -1;
+		selectedCoord = -1;
+		interfaceNumber = 0;
+		break;
+	case 2:
+		temporalRoute.clean();
+
+		globalColor[0] = 96;
+		globalColor[1] = 0;
+		globalColor[2] = 0;
+		selectedRoute = -1;
+		selectedCoord = -1;
+		interfaceNumber = 0;
+		break;
+	}
+}
+
+void detectClickInEditRoute(){
 
 	int optionIter, option = 0;
 	bool isChoosingButton = true;
 
 	for (optionIter = 0; optionIter < 3; optionIter++) {
 		if (isClickingButton(buttonXPosition, 260, buttonYPositions[optionIter], 100)) {
-			cout << "Edit #" << optionIter + 1 << "\n" << "\n"; //temp
 			option = optionIter + 1;
 			isChoosingButton = false;
 		}
@@ -543,19 +410,26 @@ void detectEditRoute(){ //pendiente
 	default:
 		break;
 	case 1:
+		globalColor[0] = 96;
+		globalColor[1] = 0;
+		globalColor[2] = 0;
 		selectedRoute = -1;
 		selectedCoord = -1;
 		interfaceNumber = 0;
 		break;
 	case 2:
 		deleteRouteFile(selectedRoute);
-		chargeRoutes();
+		chargeAllRoutes();
+
+		globalColor[0] = 96;
+		globalColor[1] = 0;
+		globalColor[2] = 0;
 		selectedRoute = -1;
 		selectedCoord = -1;
 		interfaceNumber = 0;
 		break;
 	case 3:
-		if (routesList.getRoute(selectedRoute).getHiddenRoute()) {
+		if (routesList.getRoute(selectedRoute).getIsHiddenRoute()) {
 			routesList.setIsHiddenRoute(selectedRoute, false);
 		}
 		else {
@@ -565,40 +439,7 @@ void detectEditRoute(){ //pendiente
 	}
 }
 
-void detectCreateRoute() {
-
-	int optionIter, option = 0;
-	bool isChoosingButton = true;
-
-	for (optionIter = 0; optionIter < 2; optionIter++) {
-		if (isClickingButton(buttonXPosition, 260, buttonYPositions[optionIter], 100)) {
-			cout << "Edit #" << optionIter + 1 << "\n" << "\n"; //temp
-			option = optionIter + 1;
-			isChoosingButton = false;
-		}
-	}
-
-	switch (option) {
-	default:
-		break;
-	case 1:
-		saveNewRoute(temporalRoute);
-		selectedRoute = -1;
-		selectedCoord = -1;
-		interfaceNumber = 0;
-		globalHiddenRoute = false;
-		break;
-	case 2:
-		temporalRoute.clean();
-		selectedRoute = -1;
-		selectedCoord = -1;
-		interfaceNumber = 0;
-		globalHiddenRoute = false;
-		break;
-	}
-}
-
-void detectColorInterface(){
+void detectClickInColorInterface(){
 
 	int colorIterX, colorIterY, option = 0;
 	bool isChoosingButton = true;
@@ -606,8 +447,6 @@ void detectColorInterface(){
 	for (colorIterY = 0; colorIterY < 3; colorIterY++) {
 		for (colorIterX = 0; colorIterX < 3; colorIterX++) {
 			if (isClickingButton(colorButtonPos[0][colorIterX], 70, colorButtonPos[1][colorIterY], 70)) {
-				cout << "Color # (" << colorIterX + 1 << ", " << colorIterY + 1 << ")" << "\n" << "\n"; //temp
-				
 				globalColor[0] = colorCodes[0][option];
 				globalColor[1] = colorCodes[1][option];
 				globalColor[2] = colorCodes[2][option];
@@ -618,32 +457,49 @@ void detectColorInterface(){
 	}
 }
 
+void createRoute() {
+
+	bool isButtonPressed = false;
+	mousePosition = Mouse::getPosition(mapWindow);
+
+	refreshRoute(temporalRoute);
+
+	if ((mousePosition.x < 0 || mousePosition.x > 1600) || (mousePosition.y < 0 ||
+		mousePosition.y > 900)) {
+		return;
+	}
+
+	if (Mouse::isButtonPressed(Mouse::Left) && (isPressingInButton() || isPressingInColorInterface()) != true) {
+		while (isButtonPressed == false) {
+			if (Mouse::isButtonPressed(Mouse::Left) != true) {
+				isButtonPressed = true;
+				temporalRoute.addCoords(mousePosition.x, mousePosition.y, globalColor);
+				temporalRoute.setHiddenRoute(false);
+			}
+			loopRefresh();
+		}
+	}
+}
+
 void detectRoutes() {
 
 	int x, y, xSize = 20, ySize = 20, listIter, routeIter;
 	int routesListSize = routesList.getListSize(), routeSize;
 
 	for (listIter = 0; listIter <= routesListSize; listIter++) {
-
 		routeSize = routesList.getRoute(listIter).getRouteSize();
 
 		for (routeIter = 0; routeIter <= routeSize; routeIter++) {
-
 			x = routesList.getRoute(listIter).getX(routeIter) - 10;
 			y = routesList.getRoute(listIter).getY(routeIter) - 10;
 
 			if (isClickingButton(x, xSize, y, ySize)) {
 				selectedRoute = listIter;
 				selectedCoord = routeIter;
-
-				cout << "\n\nRuta seleccionada: " << listIter << "\n"; //temp
-				cout << "coordenada seleccionada: " << routeIter << "\n\n\n"; //temp
 			}
 		}
 	}
 }
-
-
 
 
 
@@ -653,7 +509,6 @@ void saveNewRoute(NodeRoute pRoute) {
 		temporalRoute.clean();
 		return;
 	}
-
 	string url = "Routes/r", type = ".txt", name;
 	int routeIter = 0;
 
@@ -677,22 +532,18 @@ void saveNewRoute(NodeRoute pRoute) {
 	int verifyInt = 0, secondIter;
 	string intNum;
 
-	createFile << pRoute.getHiddenRoute() << endl;
+	createFile << pRoute.getIsHiddenRoute() << endl;
 
 	for (routeIter = 0; routeIter <= size; routeIter++) {
-
 		createFile << pRoute.getX(routeIter) << endl;
 		createFile << pRoute.getY(routeIter) << endl;
 
 		for (secondIter = 0; secondIter < 3; secondIter++) {
-
 			verifyInt = pRoute.getColor(routeIter, secondIter);
+
 			if (verifyInt < 100 && verifyInt >= 10) {
-
 				intNum = "0" + to_string(verifyInt);
-
 			} else if (verifyInt < 10) {
-
 				intNum = "00" + to_string(verifyInt);
 			}
 			else {
@@ -713,55 +564,43 @@ void saveAllRoutes() {
 	int routeIter, routeListSize = routesList.getListSize();
 
 	for (routeIter = 0; routeIter <= routeListSize; routeIter++) {
-
 		deleteRouteFile(routeIter);
-
 	}
 
 	for (routeIter = 0; routeIter <= routeListSize; routeIter++) {
-
 		saveNewRoute(routesList.getRoute(routeIter));
-
 	}
 }
 
-void chargeRoutes() {
+void chargeAllRoutes() {
 
 	routesList.clean();
 
 	const int maxRoutes = 99;
-	int routeIter = 0;
+	int routeIter = 0, x, y, colors[3];
 	string url = "Routes/r", type = ".txt", name;
 	string line;
 
-	int x, y;
-	int colors[3];
-
 	ifstream file;
-
 	NodeRoute newRoute;
 	
 	for (routeIter; routeIter < maxRoutes; routeIter++) {
-
 		name = url + to_string(routeIter) + type;
-
 		file.open(name);
 
 		if (!file.is_open()) {
 			continue;
 		}
-
 		getline(file, line);
-
 		newRoute.setHiddenRoute(atoi(line.c_str()));
-
 		getline(file, line);
-		while (line != ";") {
 
+		while (line != ";") {
 			x = atoi(line.c_str());
 			getline(file, line);
 			y = atoi(line.c_str());
 			getline(file, line);
+
 			for (int iter = 0; iter < 3; iter++) {
 				colors[iter] = atoi(line.substr(0, 3).c_str());
 				line.erase(0, 4);
@@ -771,7 +610,6 @@ void chargeRoutes() {
 		}
 		routesList.addRoute(newRoute);
 		newRoute.clean();
-		
 		file.close();
 	}
 }
@@ -782,18 +620,103 @@ void deleteRouteFile(int pRouteNum) {
 	char fullName[16];
 
 	name = url + to_string(pRouteNum) + type;
-	strcpy(fullName, name.c_str());
 
+	strcpy(fullName, name.c_str());
 	remove(fullName);
 
 }
 
 
 
+bool isClickingButton(int pXPosition, int pXSizePosition, int pYPosition, int pYSizePosition) {
+
+	int minX = pXPosition;
+	int maxX = pXPosition + (pXSizePosition);
+	int minY = pYPosition;
+	int maxY = minY + (pYSizePosition);
+	bool isButtonPressed = false;
+
+	Vector2f top(minX, maxX);
+	Vector2f bottom(minY, maxY);
+
+	if (Mouse::isButtonPressed(Mouse::Left) && (mousePositionDetect(top, bottom))) {
+		while (isButtonPressed == false) {
+			if (Mouse::isButtonPressed(Mouse::Left) != true) {
+				isButtonPressed = true;
+			}
+			loopRefresh();
+		}
+		return true;
+	}
+	return false;
+}
+
+bool mousePositionDetect(Vector2f pTopPosition, Vector2f pBottomPosition) {
+
+	mousePosition = Mouse::getPosition(mapWindow);
+
+	if ((mousePosition.x < 0 || mousePosition.x > 1600) || (mousePosition.y < 0 || mousePosition.y > 900)) {
+		return false;
+	}
+	bool isInTop = false;
+	bool isInBottom = false;
+
+	if ((mousePosition.x > pTopPosition.x) && (mousePosition.x < pTopPosition.y)) {
+		isInTop = true;
+	}
+	else {
+		isInTop = false;
+	}
+	if ((mousePosition.y > pBottomPosition.x) && (mousePosition.y < pBottomPosition.y)) {
+		isInBottom = true;
+	}
+	else {
+		isInBottom = false;
+	}
+	if (isInTop && isInBottom) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool isPressingInButton() {
+
+	int minX = buttonXPosition;
+	int maxX = minX + 260;
+	bool clickDetected = false;
+
+	for (int buttonIter = 0; buttonIter < 4; buttonIter++) {
+		int minY = buttonYPositions[buttonIter];
+		int maxY = minY + 100;
+
+		if (mousePositionDetect(Vector2f(minX, maxX), Vector2f(minY, maxY))) {
+			return true;
+		}
+		if (clickDetected) {
+			continue;
+		}
+	}
+	return clickDetected;
+}
+
+bool isPressingInColorInterface() {
+
+	int minX = 50;
+	int maxX = minX + (360 * 1.1);
+	int minY = 390;
+	int maxY = minY + (300 * 1.5);
+
+	if (mousePositionDetect(Vector2f(minX, maxX), Vector2f(minY, maxY))) {
+		return true;
+	}
+	return false;
+}
+
 
 
 void loopRefresh() {
-
 	while (mapWindow.pollEvent(mapEvent)) {
 		if (mapEvent.type == Event::Closed) {
 			mapWindow.close();

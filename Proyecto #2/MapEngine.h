@@ -7,32 +7,31 @@
 using namespace sf;
 
 void openMap();
-void refreshInterface();
-void refreshEditInterface();
-void refreshCreateInterface();
-void refreshColorInterface();
 
-void createRoute();
+void refreshPrincipalInterface();
+void refreshCreateInterface();
+void refreshEditInterface();
+void refreshColorInterface();
 void refreshAllRoutes();
 void refreshRoute(NodeRoute&);
-void refreshSelectedRoute();
-void drawLine(int, int, int, int, int[]);
+void refreshSquareSelectedRoute();
+void drawLine(Vector2f, Vector2f, int[]);
 
-bool mouseDetect(Vector2f, Vector2f);
-bool isClickingButton(int, int, int, int);
-bool isPressingInterface();
-bool isPressingButton();
-bool isPressingColorInterface();
-
-void detectButton();
-void detectCreateRoute();
-void detectEditRoute();
-void detectColorInterface();
+void detectClickInButton();
+void detectClickInCreateRoute();
+void detectClickInEditRoute();
+void detectClickInColorInterface();
+void createRoute();
 void detectRoutes();
 
 void saveNewRoute(NodeRoute);
 void saveAllRoutes();
-void chargeRoutes();
+void chargeAllRoutes();
 void deleteRouteFile(int);
+
+bool isClickingButton(int, int, int, int);
+bool mousePositionDetect(Vector2f, Vector2f);
+bool isPressingInButton();
+bool isPressingInColorInterface();
 
 void loopRefresh();

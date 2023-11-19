@@ -8,7 +8,6 @@ NodeRouteList::NodeRouteList() {
 NodeRouteList::~NodeRouteList() {
 
 	NodeList* temp;
-
 	while (lHead) {
 		try {
 			temp = lHead;
@@ -23,6 +22,8 @@ void NodeRouteList::addRoute(NodeRoute &pRouteNode) {
 	NodeRoute auxRoute;
 	int x, y;
 	int colors[3];
+
+	auxRoute.setHiddenRoute(pRouteNode.getIsHiddenRoute());
 
 	for (int iter = 0; iter <= pRouteNode.getRouteSize(); iter++) {
 
@@ -56,9 +57,7 @@ void NodeRouteList::setRouteColor(int pRoutePos, int pCoordPos, int pNewColor[])
 	while (actual->nodePosition != pRoutePos) {
 		actual = actual->next;
 	}
-
-	actual->routeInfo.setNewColor(pCoordPos, pNewColor);
-
+	actual->routeInfo.setColor(pCoordPos, pNewColor);
 }
 
 void NodeRouteList::setIsHiddenRoute(int pRoutePos, bool pIsHiddenRoute){
@@ -67,33 +66,12 @@ void NodeRouteList::setIsHiddenRoute(int pRoutePos, bool pIsHiddenRoute){
 	while (actual->nodePosition != pRoutePos) {
 		actual = actual->next;
 	}
-
 	actual->routeInfo.setHiddenRoute(pIsHiddenRoute);
-
-}
-
-void NodeRouteList::replaceRoute(NodeRoute pRouteNode, int pRoutePos) {
-
-	NodeList* newRouteNode = new NodeList(pRouteNode, pRoutePos);
-	NodeList* actual = lHead;
-	NodeList* nextActual = actual->next;
-	if (actual->next) {
-		while (nextActual->nodePosition != pRoutePos) {
-			actual = nextActual;
-			nextActual = nextActual->next;
-		}
-	}
-	newRouteNode->next = nextActual->next;
-	actual->next = newRouteNode;
-	nextActual->next = nullptr;
-
-	delete nextActual;
 }
 
 void NodeRouteList::clean() {
 
 	NodeList* actual;
-
 	while (lHead) {
 
 		actual = lHead;
@@ -103,26 +81,7 @@ void NodeRouteList::clean() {
 	lHead = nullptr;
 }
 
-NodeRoute& NodeRouteList::getRoute(int pRoutePos) {
 
-	NodeList* actual = lHead;
-	while (actual->nodePosition != pRoutePos) {
-		actual = actual->next;
-	}
-	return actual->routeInfo;
-
-}
-
-void NodeRouteList::printAll() {
-
-	NodeList* actual = lHead;
-
-	while (actual) {
-		cout << "Ruta: " << actual->nodePosition +1 << "\n";
-		actual->routeInfo.printAll();
-		actual = actual->next;
-	}
-}
 
 int NodeRouteList::getListSize() {
 
@@ -134,4 +93,13 @@ int NodeRouteList::getListSize() {
 		actual = actual->next;
 	}
 	return actual->nodePosition;
+}
+
+NodeRoute& NodeRouteList::getRoute(int pRoutePos) {
+
+	NodeList* actual = lHead;
+	while (actual->nodePosition != pRoutePos) {
+		actual = actual->next;
+	}
+	return actual->routeInfo;
 }
